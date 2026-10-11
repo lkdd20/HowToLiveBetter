@@ -42,16 +42,19 @@ if (/googletagmanager|google-analytics/.test(html)) throw new Error('剥掉标�
 // 相对链接在本地打开时是死的，改成线上地址
 must('href="README.md"', ' README.md 链接');
 must('href="book/"', ' book/ 链接');
+must('href="selfcheck.html"', ' 自查页链接');
 html = html
   .replaceAll('href="README.md"', `href="${REPO}/blob/main/README.md"`)
+  .replaceAll('href="selfcheck.html"', `href="${SITE}selfcheck.html"`)
   .replaceAll('href="book/"', `href="${REPO}/tree/main/book"`)
   .replaceAll('<a class="title" href="./"', `<a class="title" href="${SITE}"`);
 
-// 侧栏图片转 data URI，否则离线打开是个裂图
-const ad = 'ads/mcyyy-side.webp';
-must(`src="${ad}"`, `侧栏图片 ${ad}`);
-const adData = readFileSync(resolve(ROOT, ad)).toString('base64');
-html = html.replace(`src="${ad}"`, `src="data:image/webp;base64,${adData}"`);
+// 侧栏广告图和赞赏码转 data URI，否则离线打开是个裂图
+for (const [img, mime] of [['ads/mcyyy-side.webp', 'image/webp'], ['ads/wechat-reward.png', 'image/png']]) {
+  must(`src="${img}"`, `图片 ${img}`);
+  const data = readFileSync(resolve(ROOT, img)).toString('base64');
+  html = html.replace(`src="${img}"`, `src="data:${mime};base64,${data}"`);
+}
 
 // 页脚注明这是哪一版的离线副本
 const foot = '<div class="foot">';
